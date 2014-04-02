@@ -10,13 +10,22 @@ else()
     return()
 endif()
 
+find_package(MPI REQUIRED)
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
+    ${MPI_CXX_LIBRARIES}
+    )
+
+
 
 set(actr_src
     src/actr/helpers.cpp
+    src/actr/ActrBase.cpp
     )
 
 set(actr_headers
+    include/actr/exceptions.hpp
     include/actr/helpers.hpp
+    include/actr/ActrBase.hpp
     )
 
 add_library(

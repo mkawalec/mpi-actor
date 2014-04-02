@@ -12,13 +12,16 @@ namespace actr {
     private:
         static std::list<ActrBase*> available;
         std::string name, description;
+        const int buf_length = 20;
 
+        ActrBase* clone_instance(std::string instance_name);
+        virtual ActrBase* clone() = 0;
 
     public:
         // Registers the instance
         ActrBase();
 
-        void enter_watch();
+        void function_watch();
         virtual void main_loop() = 0;
     };
 }

@@ -1,6 +1,10 @@
+#include "actr/helpers.hpp"
 #include "actr/ActrBase.hpp"
+#include "actr/exceptions.hpp"
 
 #include <mpi.h>
+#include <iostream>
+#include <string>
 
 namespace actr {
 
@@ -9,9 +13,23 @@ namespace actr {
         ActrBase::available.push_back(this);
     }
 
+    ActrBase* ActrBase::clone_instance(std::string)
+    {
+        for (auto it = ActrBase::available.begin();
+                  it != ActrBase::available.end(); ++it) {
+            continue;
+        }
+    }
+
+
     void ActrBase::function_watch()
     {
-        // There is a limit on the class
-        // name of 20 characters
-        auto recv_buffer = new char[buf_length];
-        MPI_Recv(recv_buffer, buf_length,
+        std::string message = get_str(0);
+        if (message == "shutdown")
+            throw ProgramDeathRequest();
+        else {
+            auto instance = clone_instance(message);
+            instance->main_loop();
+        }
+    }
+}

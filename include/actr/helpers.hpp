@@ -4,18 +4,14 @@
 #include <mpi.h>
 #include <typeinfo>
 #include <vector>
+#include <string>
 
 
 namespace actr {
-    const int BUF_SIZE = sizeof(int) * 1000000;
-    void *outbuf = malloc(4 + BUF_SIZE),
-         *inbuf  = malloc(4 + BUF_SIZE);
+    const int BUF_SIZE = 100;
 
-    template <typename T>
-    void send_msg(std::vector<T> &message, int to_whom);
-
-    template <typename T>
-    T get_msg(int from=MPI_ANY_SOURCE);
+    MPI_Request send_str(std::string &message, int to_whom);
+    std::string get_str(int from=MPI_ANY_SOURCE);
 
 }
 
