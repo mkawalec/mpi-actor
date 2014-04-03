@@ -5,8 +5,11 @@
 #include <mpi.h>
 #include <iostream>
 #include <string>
+#include <map>
 
 namespace actr {
+
+    std::list<ActrBase*> ActrBase::available;
 
     ActrBase::ActrBase()
     {
@@ -71,11 +74,31 @@ namespace actr {
                 MPI_Status tmp_status;
                 MPI_Wait(&requests[i], &tmp_status);
             }
+
+            delete[] requests;
         }
 
         if (my_rank >= first_free_rank &&
             my_rank < first_free_rank + how_many) function_watch();
 
+        for (int i = first_free_rank;
+                 i < first_free_rank + how_many; ++i)
+            class_usage.emplace(i, what);
+
+        first_free_rank += how_many;
+    }
+
+    std::map<std::string, int> ActrBase::get_class_counts()
+    {
+        std::map<std::string, int> counts;
+        for (auto it = class_usage.begin(); it != class_usage.end(); ++it) {
+            if (counts.find(it->second) == counts.end())
+                counts.emplace(it->second, 0);
+
+            counts.at(it->second) += 1;
+        }
+
+        return counts;
     }
 
 }

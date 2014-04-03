@@ -12,7 +12,6 @@ namespace actr {
     class ActrBase {
     private:
         static std::list<ActrBase*> available;
-        std::string name, description;
         const int buf_length = 20;
 
         // Inner MPI related bookkeeping
@@ -24,11 +23,15 @@ namespace actr {
 
         ActrBase* clone_instance(std::string instance_name);
         ActrBase* instance = NULL;
-        virtual ActrBase* clone() = 0;
 
         // Initiate the watch for a role that is designated to the
         // current thread
         void function_watch();
+
+    protected:
+        std::string name, description;
+        virtual ActrBase* clone() = 0;
+        std::map<std::string, int> get_class_counts();
 
     public:
         // Registers the instance

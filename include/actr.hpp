@@ -6,8 +6,8 @@
  * in your application
  */
 
+#include "actr/ActrBase.hpp"
 #include "actr/exceptions.hpp"
 #include "actr/helpers.hpp"
-#include "actr/ActrBase.hpp"
 
 #endif

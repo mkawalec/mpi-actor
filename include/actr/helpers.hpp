@@ -16,6 +16,6 @@ namespace actr {
 }
 
 // The preprocessor directive to register new instances
-#define DECLARE_ACTR_PLUGIN(clsname) actr::clsname plugin_ ## clsname
+#define DECLARE_ACTR_PLUGIN(clsname) clsname plugin_ ## clsname
 
 #endif

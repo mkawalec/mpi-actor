@@ -15,6 +15,14 @@ set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
     ${MPI_CXX_LIBRARIES}
     )
 
+INCLUDE_DIRECTORIES(
+    ${INCLUDE_DIRECTORIES}
+    ${MPI_CXX_INCLUDE_PATH}
+    )
+
+LINK_DIRECTORIES(
+    ${MPI_CXX_LIBRARIES}
+    )
 
 
 set(actr_src
@@ -34,4 +42,21 @@ add_library(
     SHARED
     ${actr_src}
     ${actr_headers}
+    )
+
+set(frog_headers
+    include/frogs/Frog.hpp
+    include/frogs/LandCell.hpp
+    )
+
+set(frogs_src
+    src/frogs/Frog.cpp
+    src/frogs/LandCell.cpp
+    src/frogs.cpp
+    ${frog_headers}
+    )
+
+add_executable(frogs ${frogs_src})
+target_link_libraries(frogs -lm actr
+    ${MPI_CXX_LIBRARIES}
     )
