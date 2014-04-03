@@ -34,16 +34,16 @@ LINK_DIRECTORIES(
     )
 
 
-set(actr_src
-    src/actr/helpers.cpp
-    src/actr/ActrBase.cpp
-    )
-
 set(actr_headers
     include/actr/exceptions.hpp
     include/actr/helpers.hpp
     include/actr/ActrBase.hpp
     include/actr.hpp
+    )
+
+set(actr_src
+    src/actr/helpers.cpp
+    src/actr/ActrBase.cpp
     )
 
 add_library(
@@ -56,11 +56,13 @@ add_library(
 set(frog_headers
     include/frogs/Frog.hpp
     include/frogs/LandCell.hpp
+    include/frogs/Clock.hpp
     )
 
 set(frogs_src
     src/frogs/Frog.cpp
     src/frogs/LandCell.cpp
+    src/frogs/Clock.cpp
     src/frogs.cpp
     ${frog_headers}
     )
