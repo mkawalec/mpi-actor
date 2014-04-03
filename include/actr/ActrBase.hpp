@@ -5,6 +5,7 @@
 #include <list>
 #include <string>
 #include <map>
+#include <utility>
 
 
 namespace actr {
@@ -32,6 +33,9 @@ namespace actr {
         std::string name, description;
         virtual ActrBase* clone() = 0;
         std::map<std::string, int> get_class_counts();
+        std::string preprocess_msg(std::pair<std::string, int> msg);
+
+        void update_info(int rank);
 
     public:
         // Registers the instance
@@ -44,6 +48,10 @@ namespace actr {
         void execute();
 
         void request_allocation(std::string what, int how_many);
+
+        // Called by just one thread to allocate additional instances
+        // of a given class
+        void allocate_additional(std::string what, int how_many);
     };
 }
 

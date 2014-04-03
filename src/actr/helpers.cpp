@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <utility>
 
 
 namespace actr {
@@ -13,7 +14,7 @@ namespace actr {
      *  request handle, on which MPI_Wait must be called to
      *  resolve the request.
      */
-    MPI_Request send_str(std::string &message, int to_whom)
+    MPI_Request send_str(std::string message, int to_whom)
     {
         MPI_Request request;
         MPI_Issend((char*)message.c_str(), message.size() + 1,
@@ -23,7 +24,7 @@ namespace actr {
     }
 
 
-    std::string get_str(int from)
+    std::pair<std::string, int> get_str(int from)
     {
         MPI_Status status;
         int msg_size;
@@ -33,7 +34,7 @@ namespace actr {
                  0, MPI_COMM_WORLD, &status);
 
         MPI_Get_count(&status, MPI_CHAR, &msg_size);
-        return std::string(inbuf, msg_size);
+        return std::make_pair(std::string(inbuf, msg_size), status.MPI_SOURCE);
     }
 }
 

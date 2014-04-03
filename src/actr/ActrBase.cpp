@@ -6,6 +6,12 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <utility>
+
+#include <boost/regex.hpp>
+#include <boost/algorithm/string/regex.hpp>
+
+
 
 namespace actr {
 
@@ -18,6 +24,17 @@ namespace actr {
 
     ActrBase::~ActrBase()
     {
+        int my_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+
+        for (auto it = class_usage.begin();
+                  it != class_usage.end(); ++it) {
+            if (it->first == my_rank)
+                continue;
+
+            send_str("#! del " + std::to_string(my_rank), it->first);
+        }
+
         delete instance;
     }
 
@@ -34,10 +51,13 @@ namespace actr {
 
     void ActrBase::function_watch()
     {
-        std::string message = get_str(0);
+        std::string message = get_str().first;
         if (message == "shutdown")
             throw ProgramDeathRequest();
         else {
+            if (instance != NULL)
+                delete instance;
+
             instance = clone_instance(message);
         }
     }
@@ -46,10 +66,11 @@ namespace actr {
     {
         // If the current instance is not allocated, it should
         // just terminate gracefully
-        if (instance == NULL)
-            throw ProgramDeathRequest();
-
-        instance->main_loop();
+        if (instance != NULL) {
+            instance->main_loop();
+            delete instance;
+            instance = NULL;
+        }
     }
 
     void ActrBase::request_allocation(std::string what, int how_many)
@@ -86,6 +107,92 @@ namespace actr {
             class_usage.emplace(i, what);
 
         first_free_rank += how_many;
+    }
+
+    void ActrBase::allocate_additional(std::string what, int how_many)
+    {
+        MPI_Comm_size(MPI_COMM_WORLD, &total_ranks);
+
+        int set_up = 0;
+        std::vector<int> added;
+        added.reserve(how_many);
+
+        for (int i = 0; i < total_ranks; ++i) {
+            if (class_usage.find(i) != class_usage.end())
+                continue;
+
+            MPI_Request request;
+            MPI_Status tmp_status;
+
+            request = send_str(what, i);
+            MPI_Wait(&request, &tmp_status);
+            added.push_back(i);
+
+            class_usage.emplace(i, what);
+            ++set_up;
+
+            if (set_up == how_many)
+                break;
+        }
+
+        for (int i = 0; (unsigned)i < added.size(); ++i)
+            update_info(added[i]);
+
+    }
+
+    /* Possible commands
+     * #! del rank -> delete the instance at a given rank
+     * #! add rank class_id -> add an instance at a  given rank
+     *
+     * keywords (optional, added at the end of message, delimited
+     * by a ';' sign):
+     *
+     * cont -> there will be a new message coming, wait for it
+     */
+
+    void ActrBase::update_info(int rank)
+    {
+        // Send update commands to a given rank
+        for (auto it = class_usage.begin();
+                  it != class_usage.end(); ++it) {
+            std::string message = "#! add " + std::to_string(it->first)
+                + " " + it->second;
+
+            if (it != (--class_usage.end()))
+                message += ";cont";
+
+            MPI_Request request;
+            MPI_Status tmp_status;
+
+            request = send_str(message, rank);
+            MPI_Wait(&request, &tmp_status);
+        }
+    }
+
+    std::string ActrBase::preprocess_msg(std::pair<std::string, int> msg)
+    {
+        if (msg.first.find("#!") == std::string::npos)
+            return msg.first;
+
+        std::vector<std::string> keyw, comms;
+        boost::split_regex(keyw, msg.first, boost::regex(";"));
+        boost::split_regex(comms, keyw[0], boost::regex(" "));
+
+        int rank = std::stoi(comms[2]);
+        if (comms[1] == "del") {
+            if (class_usage.find(rank) != class_usage.end())
+                class_usage.erase(rank);
+        } else if (comms[1] == "add") {
+            if (class_usage.find(rank) != class_usage.end())
+                class_usage.erase(rank);
+
+            class_usage.emplace(rank, comms[3]);
+        }
+
+        if (keyw.size() > 1 && keyw[1] == "cont")
+            return preprocess_msg(get_str(msg.second));
+
+        return "";
     }
 
     std::map<std::string, int> ActrBase::get_class_counts()

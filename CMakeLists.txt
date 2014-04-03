@@ -15,13 +15,22 @@ set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
     ${MPI_CXX_LIBRARIES}
     )
 
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED OFF)
+set(Boost_USE_STATIC_RUNTIME OFF)
+set(BOOST_ALL_DYN_LINK ON)
+
+find_package(Boost 1.52 REQUIRED COMPONENTS regex)
+
 INCLUDE_DIRECTORIES(
     ${INCLUDE_DIRECTORIES}
     ${MPI_CXX_INCLUDE_PATH}
+    ${Boost_INCLUDE_DIR}
     )
 
 LINK_DIRECTORIES(
     ${MPI_CXX_LIBRARIES}
+    ${Boost_LIBRARY_DIRS}
     )
 
 
@@ -59,4 +68,5 @@ set(frogs_src
 add_executable(frogs ${frogs_src})
 target_link_libraries(frogs -lm actr
     ${MPI_CXX_LIBRARIES}
+    ${Boost_LIBRARIES}
     )

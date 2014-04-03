@@ -5,13 +5,14 @@
 #include <typeinfo>
 #include <vector>
 #include <string>
+#include <utility>
 
 
 namespace actr {
     const int BUF_SIZE = 100;
 
-    MPI_Request send_str(std::string &message, int to_whom);
-    std::string get_str(int from=MPI_ANY_SOURCE);
+    MPI_Request send_str(std::string message, int to_whom);
+    std::pair<std::string, int> get_str(int from=MPI_ANY_SOURCE);
 
 }
 
