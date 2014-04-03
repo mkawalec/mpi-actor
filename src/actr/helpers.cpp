@@ -9,7 +9,11 @@
 
 namespace actr {
 
-    MPI_Request send_msg(std::string &message, int to_whom)
+    /** Sends a string asynchronously and returns the
+     *  request handle, on which MPI_Wait must be called to
+     *  resolve the request.
+     */
+    MPI_Request send_str(std::string &message, int to_whom)
     {
         MPI_Request request;
         MPI_Issend((char*)message.c_str(), message.size() + 1,
@@ -19,7 +23,7 @@ namespace actr {
     }
 
 
-    std::string get_msg(int from)
+    std::string get_str(int from)
     {
         MPI_Status status;
         int msg_size;

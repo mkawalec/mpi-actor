@@ -26,6 +26,7 @@ set(actr_headers
     include/actr/exceptions.hpp
     include/actr/helpers.hpp
     include/actr/ActrBase.hpp
+    include/actr.hpp
     )
 
 add_library(
