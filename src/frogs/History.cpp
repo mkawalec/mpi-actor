@@ -17,7 +17,7 @@ namespace frogs {
     }
 
     template <typename T>
-    void History<T>::insert(T &element)
+    void History<T>::insert(T element)
     {
         storage[pos%length] = element;
         pos += 1;

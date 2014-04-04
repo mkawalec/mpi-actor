@@ -3,11 +3,16 @@
 
 #include "actr.hpp"
 
+#include <limits>
+
+
 namespace frogs {
 
     class Frog : public actr::ActrBase {
     private:
-        int x=-1, y=-1;
+        int hop_count = 0;
+        float x = std::numeric_limits<float>::max(),
+              y = std::numeric_limits<float>::max();
         bool healthy = true;
 
     protected:

@@ -14,7 +14,7 @@ namespace frogs {
         virtual ~History();
 
         float get_avg(int count=-1);
-        void insert(T &element);
+        void insert(T element);
     };
 }
 
