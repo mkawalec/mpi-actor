@@ -20,10 +20,6 @@ namespace actr {
         // Inner MPI related bookkeeping
         int total_ranks, first_free_rank = 0;
 
-        // The following holds information about what
-        // classes do processes with different rank hold
-        std::map<int, std::string> class_usage;
-
         ActrBase* clone_instance(std::string instance_name);
         ActrBase* instance = NULL;
 
@@ -38,6 +34,10 @@ namespace actr {
         message preprocess_msg(message msg);
 
         void update_info(int rank);
+
+        // The following holds information about what
+        // classes do processes with different rank hold
+        std::map<int, std::string> class_usage;
 
     public:
         // Registers the instance
