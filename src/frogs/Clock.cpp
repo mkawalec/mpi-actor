@@ -44,7 +44,6 @@ namespace frogs {
             delete[] requests;
 
             years_passed += 1;
-            std::cout << "3" << std::endl;
 
             // If the simulation is supposed to end
             // send a death command to all the processes

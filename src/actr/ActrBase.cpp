@@ -7,6 +7,7 @@
 #include <string>
 #include <map>
 #include <utility>
+#include <cstdlib>
 
 
 #include <iostream>
@@ -43,6 +44,9 @@ namespace actr {
 
     ActrBase* ActrBase::clone_instance(std::string command)
     {
+        int my_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+        srand(my_rank);
         auto keyw = split_and_trim(command, " ");
 
         for (auto it = ActrBase::available.begin();
@@ -95,7 +99,7 @@ namespace actr {
 
     void ActrBase::request_allocation(std::string what, int how_many)
     {
-        std::cout << "request_allocation called" << std::endl;
+        //std::cout << "request_allocation called" << std::endl;
         MPI_Comm_size(MPI_COMM_WORLD, &total_ranks);
         if (total_ranks - first_free_rank < how_many)
             throw AllocationError("Not enough processes available");
@@ -170,6 +174,19 @@ namespace actr {
 
     }
 
+    bool ActrBase::is_eventloop_available(int rank)
+    {
+        std::string class_name = class_usage.at(rank);
+        for (auto it = ActrBase::available.begin();
+                  it != ActrBase::available.end(); ++it) {
+            if ((*it)->name == class_name)
+                return (*it)->has_eventloop;
+        }
+
+        throw InstanceNotFound();
+    }
+
+
     /* Possible system commands
      * #! del rank -> delete the instance at a given rank
      * #! add rank class_id -> add an instance at a  given rank
@@ -187,7 +204,7 @@ namespace actr {
         int my_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
-        // Send update commands to a given rank
+        // Send update commands to the new class
         for (auto it = class_usage.begin();
                   it != class_usage.end(); ++it) {
             std::string message = "#! add " + std::to_string(it->first)
@@ -199,21 +216,27 @@ namespace actr {
             MPI_Request request;
             MPI_Status tmp_status;
 
-            // First message, to the recently added class about
-            // the old instance
             request = send_str(message, rank);
             MPI_Wait(&request, &tmp_status);
+            //std::cout << "Sent info on " << it->first << " as: " << message << std::endl;
+        }
 
-            if (it->first == my_rank) continue;
+        // Notify the old instances about the new class
+        for (auto it = class_usage.begin();
+                  it != class_usage.end(); ++it) {
+            if (it->first == my_rank or !is_eventloop_available(it->first) or
+                    it->first == rank)
+                continue;
 
-            // Second message, notifiying the old instance about
-            // the new class
+            MPI_Request request;
+            MPI_Status tmp_status;
+
             request = send_str("#! add " + std::to_string(rank)
                     + " " + class_usage.at(rank), it->first);
-            std::cout << "Waiting for a message from " << my_rank
-                << " to " << it->first << std::endl;
+            int num = rand();
+            //std::cout << "Wait " << num << " sent from " << my_rank << " to " << it->first << std::endl;
             MPI_Wait(&request, &tmp_status);
-            std::cout << "Message sent" << std::cout;
+            //std::cout << "Completed " << num << std::endl;
         }
     }
 
@@ -224,7 +247,7 @@ namespace actr {
 
         int my_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-        std::cout << "command detected in: " << msg.first << ":: at rank " << my_rank << " from " << std::to_string(msg.second) << std::endl;
+        //std::cout << "command detected in: " << msg.first << ":: at rank " << my_rank << " from " << std::to_string(msg.second) << std::endl;
         auto keyw = split_and_trim(msg.first, ";");
         auto comms = split_and_trim(keyw[0], " ");
 

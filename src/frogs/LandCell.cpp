@@ -27,11 +27,11 @@ namespace frogs {
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
         while (true) {
-            std::cout << "About to get a msg at " << my_rank << std::endl;
+            //if (my_rank == 11) std::cout << "About to get a msg at " << my_rank << std::endl;
 
             actr::message msg = preprocess_msg(actr::get_str());
             if (msg.second == -1) continue;
-            std::cout << "Received at " << my_rank << std::endl;
+            //if (my_rank == 11) std::cout << "Received at " << my_rank << std::endl;
 
             MPI_Request request;
             MPI_Status status;
@@ -41,13 +41,17 @@ namespace frogs {
                 population_influx += 1;
                 request = actr::send_str(std::to_string(population_influx) + " "
                         + std::to_string(infection_level), msg.second);
+                //if (my_rank == 11) std::cout << "Before first wait" << std::endl;
                 MPI_Wait(&request, &status);
+                //if (my_rank == 11) std::cout << "After first wait" << std::endl;
 
             } else if (msg.first == "clean") {
                 population_influx += 1;
                 request = actr::send_str(std::to_string(population_influx) + " "
                         + std::to_string(infection_level), msg.second);
+                //if (my_rank == 11) std::cout << "Before second wait to " << msg.second << std::endl;
                 MPI_Wait(&request, &status);
+                //if (my_rank == 11) std::cout << "After second wait" << std::endl;
             } else if (msg.first == "new_year") {
                 reset_year();
             } else if (msg.first == "terminate") {

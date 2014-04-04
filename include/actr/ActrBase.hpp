@@ -27,6 +27,11 @@ namespace actr {
         // current thread
         void function_watch();
 
+        // Return true if a class at a given rank has
+        // an event loop capable of retrieving
+        // messages
+        bool is_eventloop_available(int rank);
+
     protected:
         std::string name, description;
         virtual ActrBase* clone() = 0;

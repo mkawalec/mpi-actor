@@ -6,14 +6,16 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <list>
 
 
 namespace actr {
-    const int BUF_SIZE = 100;
+    const int BUF_SIZE = 1000;
     typedef std::pair<std::string, int> message;
 
     MPI_Request send_str(std::string message, int to_whom);
     message get_str(int from=MPI_ANY_SOURCE);
+    bool is_message(int from=MPI_ANY_SOURCE);
 
     template <typename T>
     void unused(T &&) { }
