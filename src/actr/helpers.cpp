@@ -21,13 +21,27 @@ namespace actr {
     std::list<message> msg_backlog;
     char* inbuf = new char[BUF_SIZE];
 
+    bool backlog_has_message(int from)
+    {
+        if (from == MPI_ANY_SOURCE)
+            return !msg_backlog.empty();
+
+        for (auto it = msg_backlog.begin();
+                  it != msg_backlog.end(); ++it) {
+            if (it->second == from)
+                return true;
+        }
+
+        return false;
+    }
+
     bool is_message(int from)
     {
         MPI_Status status;
         int msg_awaits;
         MPI_Iprobe(from, 0, MPI_COMM_WORLD, &msg_awaits, &status);
 
-        return (bool) msg_awaits;
+        return (bool)msg_awaits;
     }
 
 
@@ -42,28 +56,32 @@ namespace actr {
 
         int my_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-            if (my_rank == 22) std::cout << "I" << std::endl;
+            //if (my_rank == 22) std::cout << "I" << std::endl;
 
         while (is_message()) {
             //if (my_rank == 18) std::cout << "II" << std::endl;
-            msg_backlog.push_back(get_str());
+            msg_backlog.push_back(get_str(MPI_ANY_SOURCE, true));
+            //std::cout << "Filling backlog" << std::endl;
         }
 
-            if (my_rank == 22) std::cout << "III" << std::endl;
         MPI_Request request;
         MPI_Issend((char*)message.c_str(), message.size(),
                   MPI_CHAR, to_whom, 0, MPI_COMM_WORLD, &request);
+        //std::cout << "send to " << to_whom << std::endl;
 
             //if (my_rank == 18) std::cout << "IV" << std::endl;
         return request;
     }
 
 
-    std::pair<std::string, int> get_str(int from)
+    message get_str(int from, bool force_network)
     {
         // If there is any message in the backlog,
         // return it instead of looking in the network
-        if (!msg_backlog.empty()) {
+        if (!msg_backlog.empty() and !force_network
+                and backlog_has_message(from)) {
+
+            //std::cout << "Trying backlog" << std::endl;
             if (from == MPI_ANY_SOURCE) {
                 message to_return = msg_backlog.front();
                 msg_backlog.pop_front();
@@ -72,13 +90,14 @@ namespace actr {
                 for (auto it = msg_backlog.begin();
                           it != msg_backlog.end(); ++it) {
                     if (it->second == from) {
-                        message to_return = msg_backlog.front();
+                        message to_return = *it;
                         msg_backlog.erase(it);
                         return to_return;
                     }
                 }
             }
         }
+        //std::cout << "from net " << from << std::endl;
 
         MPI_Status status;
         int msg_size;
@@ -87,6 +106,7 @@ namespace actr {
                  0, MPI_COMM_WORLD, &status);
 
         MPI_Get_count(&status, MPI_CHAR, &msg_size);
+        //std::cout << "returning from " << from << std::endl;
         return std::make_pair(std::string(inbuf, msg_size), status.MPI_SOURCE);
     }
 

@@ -49,10 +49,11 @@ namespace frogs {
                 population_influx += 1;
                 request = actr::send_str(std::to_string(population_influx) + " "
                         + std::to_string(infection_level), msg.second);
-                //if (my_rank == 11) std::cout << "Before second wait to " << msg.second << std::endl;
+                //std::cout << "Before second wait to " << msg.second << " by " << my_rank << std::endl;
                 MPI_Wait(&request, &status);
-                //if (my_rank == 11) std::cout << "After second wait" << std::endl;
+                //std::cout << "After second wait" << std::endl;
             } else if (msg.first == "new_year") {
+                if (my_rank == 10) std::cout << "Number of frogs: " << get_class_counts().at("frog") << std::endl;
                 reset_year();
             } else if (msg.first == "terminate") {
                 throw actr::ProgramDeathRequest();

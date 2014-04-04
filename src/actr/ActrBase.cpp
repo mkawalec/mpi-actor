@@ -46,7 +46,6 @@ namespace actr {
     {
         int my_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-        srand(my_rank);
         auto keyw = split_and_trim(command, " ");
 
         for (auto it = ActrBase::available.begin();
@@ -88,7 +87,6 @@ namespace actr {
             if (instance != NULL) {
                 instance->set_class_usage(class_usage);
                 instance->main_loop();
-                std::cout << "OUT OF MAIN LOOP!!!!!!!" << std::endl;
 
                 if (instance != NULL)
                     delete instance;
@@ -100,7 +98,6 @@ namespace actr {
 
     void ActrBase::request_allocation(std::string what, int how_many)
     {
-        //std::cout << "request_allocation called" << std::endl;
         MPI_Comm_size(MPI_COMM_WORLD, &total_ranks);
         if (total_ranks - first_free_rank < how_many)
             throw AllocationError("Not enough processes available");
@@ -141,7 +138,7 @@ namespace actr {
 
     void ActrBase::allocate_additional(std::string what, int how_many)
     {
-        std::cout << "Allocating additional " << what << std::endl;
+        std::cout << "Allocating " << what << std::endl;
         MPI_Comm_size(MPI_COMM_WORLD, &total_ranks);
         what = "#! create " + what;
 
@@ -219,7 +216,6 @@ namespace actr {
 
             request = send_str(message, rank);
             MPI_Wait(&request, &tmp_status);
-            //std::cout << "Sent info on " << it->first << " as: " << message << std::endl;
         }
 
         // Notify the old instances about the new class
@@ -234,10 +230,7 @@ namespace actr {
 
             request = send_str("#! add " + std::to_string(rank)
                     + " " + class_usage.at(rank), it->first);
-            int num = rand();
-            //std::cout << "Wait " << num << " sent from " << my_rank << " to " << it->first << std::endl;
             MPI_Wait(&request, &tmp_status);
-            //std::cout << "Completed " << num << std::endl;
         }
     }
 
@@ -248,7 +241,6 @@ namespace actr {
 
         int my_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-        //std::cout << "command detected in: " << msg.first << ":: at rank " << my_rank << " from " << std::to_string(msg.second) << std::endl;
         auto keyw = split_and_trim(msg.first, ";");
         auto comms = split_and_trim(keyw[0], " ");
 
