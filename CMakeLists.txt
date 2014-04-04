@@ -53,7 +53,26 @@ add_library(
     ${actr_headers}
     )
 
+set(biol_headers
+    include/biol/ran2.hpp
+    include/biol/frog-functions.hpp
+    )
+
+set(biol_src
+    src/biol/ran2.cpp
+    src/biol/frog-functions.cpp
+    )
+
+add_library(
+    biol
+    SHARED
+    ${biol_src}
+    ${biol_headers}
+    )
+
+
 set(frog_headers
+    include/frogs/History.hpp
     include/frogs/Frog.hpp
     include/frogs/LandCell.hpp
     include/frogs/Clock.hpp
@@ -68,7 +87,9 @@ set(frogs_src
     )
 
 add_executable(frogs ${frogs_src})
-target_link_libraries(frogs -lm actr
+target_link_libraries(frogs -lm 
+    actr
+    biol
     ${MPI_CXX_LIBRARIES}
     ${Boost_LIBRARIES}
     )

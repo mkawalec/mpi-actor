@@ -7,10 +7,12 @@ namespace frogs {
 
     class Frog : public actr::ActrBase {
     private:
-        int stuff;
+        int x=-1, y=-1;
+        bool healthy = true;
 
     protected:
         actr::ActrBase* clone();
+        void setup_params(std::vector<std::string> commands);
 
     public:
         Frog();

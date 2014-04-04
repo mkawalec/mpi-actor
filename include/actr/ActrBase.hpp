@@ -20,7 +20,7 @@ namespace actr {
         // Inner MPI related bookkeeping
         int total_ranks, first_free_rank = 0;
 
-        ActrBase* clone_instance(std::string instance_name);
+        ActrBase* clone_instance(std::string command);
         ActrBase* instance = NULL;
 
         // Initiate the watch for a role that is designated to the
@@ -38,6 +38,11 @@ namespace actr {
         // The following holds information about what
         // classes do processes with different rank hold
         std::map<int, std::string> class_usage;
+
+        virtual void setup_params(std::vector<std::string> commands)
+        {
+            unused(commands);
+        }
 
     public:
         // Registers the instance

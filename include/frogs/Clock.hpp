@@ -7,7 +7,8 @@ namespace frogs {
 
     class Clock : public actr::ActrBase {
     private:
-        int year_interval = 500;
+        int year_interval = 2000;
+        int years_passed = 0;
 
     protected:
         actr::ActrBase* clone();

@@ -15,6 +15,9 @@ namespace actr {
     MPI_Request send_str(std::string message, int to_whom);
     message get_str(int from=MPI_ANY_SOURCE);
 
+    template <typename T>
+    void unused(T &&) { }
+
 }
 
 // The preprocessor directive to register new instances

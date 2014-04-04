@@ -38,12 +38,22 @@ namespace actr {
         delete instance;
     }
 
-    ActrBase* ActrBase::clone_instance(std::string instance_name)
+    ActrBase* ActrBase::clone_instance(std::string command)
     {
+        std::vector<std::string> keyw;
+        boost::split_regex(keyw, command, boost::regex(" "));
+
         for (auto it = ActrBase::available.begin();
                   it != ActrBase::available.end(); ++it) {
-            if ((*it)->name == instance_name)
-                return (*it)->clone();
+            if ((*it)->name == keyw[1]) {
+                if (instance != NULL)
+                    delete instance;
+
+                auto instance = (*it)->clone();
+                instance->setup_params(keyw);
+
+                return instance;
+            }
         }
 
         throw ExitWithError();
@@ -51,14 +61,8 @@ namespace actr {
 
     void ActrBase::function_watch()
     {
-        std::string message = get_str().first;
-        if (message == "shutdown")
-            throw ProgramDeathRequest();
-        else {
-            if (instance != NULL)
-                delete instance;
-
-            instance = clone_instance(message);
+        while (instance == NULL) {
+            preprocess_msg(get_str());
         }
     }
 
@@ -69,14 +73,19 @@ namespace actr {
 
     void ActrBase::execute()
     {
-        // If the current instance is not allocated, it should
-        // just terminate gracefully
-        if (instance != NULL) {
-            instance->set_class_usage(class_usage);
-            instance->main_loop();
+        while (true) {
+            if (instance == NULL)
+                function_watch();
 
-            delete instance;
-            instance = NULL;
+            // If the current instance is not allocated, it should
+            // just terminate gracefully
+            if (instance != NULL) {
+                instance->set_class_usage(class_usage);
+                instance->main_loop();
+
+                delete instance;
+                instance = NULL;
+            }
         }
     }
 
@@ -150,6 +159,8 @@ namespace actr {
     /* Possible system commands
      * #! del rank -> delete the instance at a given rank
      * #! add rank class_id -> add an instance at a  given rank
+     * #! die -> terminates an instance
+     * #! create class_name params
      *
      * keywords (optional, added at the end of message, delimited
      * by a ';' sign):
@@ -194,7 +205,12 @@ namespace actr {
                 class_usage.erase(rank);
 
             class_usage.emplace(rank, comms[3]);
+        } else if (comms[1] == "die") {
+            throw ProgramDeathRequest();
+        } else if (comms[1] == "create") {
+            clone_instance(msg.first);
         }
+
 
         if (keyw.size() > 1 && keyw[1] == "cont")
             return preprocess_msg(get_str(msg.second));
