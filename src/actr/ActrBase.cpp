@@ -231,4 +231,18 @@ namespace actr {
         return counts;
     }
 
+    int ActrBase::get_nth_id(std::string classname, int which)
+    {
+        int found = 0;
+        for (auto it = class_usage.begin(); it != class_usage.end(); ++it) {
+            if (it->second == classname) {
+                found += 1;
+                if (found == which)
+                    return it->first;
+            }
+        }
+
+        throw InstanceNotFound();
+    }
+
 }

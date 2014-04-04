@@ -32,6 +32,10 @@ namespace actr {
         using Exception::Exception;
     };
 
+    struct InstanceNotFound : public Exception {
+        using Exception::Exception;
+    };
+
 }
 
 #endif

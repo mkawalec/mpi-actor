@@ -44,6 +44,8 @@ namespace actr {
             unused(commands);
         }
 
+        int get_nth_id(std::string classname, int which);
+
     public:
         // Registers the instance
         ActrBase();
