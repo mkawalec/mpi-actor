@@ -95,6 +95,7 @@ namespace actr {
 
     void ActrBase::request_allocation(std::string what, int how_many)
     {
+        std::cout << "request_allocation called" << std::endl;
         MPI_Comm_size(MPI_COMM_WORLD, &total_ranks);
         if (total_ranks - first_free_rank < how_many)
             throw AllocationError("Not enough processes available");
@@ -183,6 +184,9 @@ namespace actr {
 
     void ActrBase::update_info(int rank)
     {
+        int my_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+
         // Send update commands to a given rank
         for (auto it = class_usage.begin();
                   it != class_usage.end(); ++it) {
@@ -195,8 +199,21 @@ namespace actr {
             MPI_Request request;
             MPI_Status tmp_status;
 
+            // First message, to the recently added class about
+            // the old instance
             request = send_str(message, rank);
             MPI_Wait(&request, &tmp_status);
+
+            if (it->first == my_rank) continue;
+
+            // Second message, notifiying the old instance about
+            // the new class
+            request = send_str("#! add " + std::to_string(rank)
+                    + " " + class_usage.at(rank), it->first);
+            std::cout << "Waiting for a message from " << my_rank
+                << " to " << it->first << std::endl;
+            MPI_Wait(&request, &tmp_status);
+            std::cout << "Message sent" << std::cout;
         }
     }
 
@@ -205,6 +222,9 @@ namespace actr {
         if (msg.first.find("#!") == std::string::npos)
             return msg;
 
+        int my_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+        std::cout << "command detected in: " << msg.first << ":: at rank " << my_rank << " from " << std::to_string(msg.second) << std::endl;
         auto keyw = split_and_trim(msg.first, ";");
         auto comms = split_and_trim(keyw[0], " ");
 

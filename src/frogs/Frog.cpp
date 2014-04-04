@@ -43,6 +43,7 @@ namespace frogs {
 
         // The main loop of a frog actor
         while (true) {
+            std::cout << "loop entry at " << my_rank << std::endl;
             // First, let's execute a hop
             int land_num;
             float new_x, new_y;
@@ -62,7 +63,9 @@ namespace frogs {
                 request = actr::send_str("infected",
                         get_nth_id("land_cell", land_num));
 
+            std::cout << "before wait at rank " << my_rank << "to " << land_num << std::endl;
             MPI_Wait(&request, &tmp_status);
+            std::cout << "after wait at rank " << my_rank << std::endl;
 
             actr::message msg = preprocess_msg(actr::get_str());
             if (msg.second == -1) continue;

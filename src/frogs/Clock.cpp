@@ -3,14 +3,15 @@
 
 #include <chrono>
 #include <thread>
-
+#include <iostream>
 
 namespace frogs {
 
     Clock::Clock()
     {
-        name        = "clock";
-        description = "A chronometer announcing year changes";
+        name          = "clock";
+        description   = "A chronometer announcing year changes";
+        has_eventloop = false;
     }
 
     actr::ActrBase* Clock::clone()
@@ -28,11 +29,12 @@ namespace frogs {
             int land_count = get_class_counts().at("land_cell");
             auto requests = new MPI_Request[land_count];
 
+
             int j = 0;
             for (auto it = class_usage.begin();
-                      it != class_usage.end(); ++it, ++j) {
+                      it != class_usage.end(); ++it) {
                 if (it->second == "land_cell")
-                    requests[j] = actr::send_str("new_year", it->first);
+                    requests[j++] = actr::send_str("new_year", it->first);
             }
 
             MPI_Status tmp_status;
@@ -42,6 +44,7 @@ namespace frogs {
             delete[] requests;
 
             years_passed += 1;
+            std::cout << "3" << std::endl;
 
             // If the simulation is supposed to end
             // send a death command to all the processes

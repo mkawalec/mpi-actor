@@ -51,6 +51,10 @@ namespace actr {
         ActrBase();
         virtual ~ActrBase();
 
+        // Only notify the class of changes if it has
+        // a chance of processing the message
+        bool has_eventloop = true;
+
         // The main loop, overloaded by
         // child classes to perform some work
         virtual void main_loop() = 0;
