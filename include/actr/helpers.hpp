@@ -18,9 +18,12 @@ namespace actr {
     template <typename T>
     void unused(T &&) { }
 
+    std::vector<std::string> split_and_trim(std::string command,
+            std::string delimiter);
+
 }
 
 // The preprocessor directive to register new instances
-#define DECLARE_ACTR_PLUGIN(clsname) clsname plugin_ ## clsname
+#define DECLARE_ACTR_PLUGIN(clsname) auto plugin_ ## clsname = new clsname
 
 #endif

@@ -79,7 +79,8 @@ namespace frogs {
             // Check if birth will happen
             if (hop_count%300 and
                     biol::willGiveBirth(influx_hist.get_avg(), &state))
-                allocate_additional("frog", 1);
+                allocate_additional("frog " + std::to_string(x) +
+                        " " + std::to_string(y), 1);
 
             // Check if disease will be caught at this hop
             if (biol::willCatchDisease(infection_hist.get_avg(), &state))
@@ -96,10 +97,13 @@ namespace frogs {
 
     void Frog::setup_params(std::vector<std::string> commands)
     {
-        if (commands.size() < 4) return;
+        if (commands.size() < 5) return;
 
-        x = std::stoi(commands[2]);
-        y = std::stoi(commands[3]);
+        // The command is of a form
+        // #! create class_name params
+
+        x = std::stof(commands[3]);
+        y = std::stof(commands[4]);
     }
 
 

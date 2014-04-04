@@ -8,10 +8,8 @@
 #include <map>
 #include <utility>
 
-#include <boost/regex.hpp>
-#include <boost/algorithm/string/regex.hpp>
 
-
+#include <iostream>
 
 namespace actr {
 
@@ -24,6 +22,13 @@ namespace actr {
 
     ActrBase::~ActrBase()
     {
+        if (instance != NULL)
+            delete instance;
+
+        int finalized;
+        MPI_Finalized(&finalized);
+        if (finalized) return;
+
         int my_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
@@ -34,18 +39,15 @@ namespace actr {
 
             send_str("#! del " + std::to_string(my_rank), it->first);
         }
-
-        delete instance;
     }
 
     ActrBase* ActrBase::clone_instance(std::string command)
     {
-        std::vector<std::string> keyw;
-        boost::split_regex(keyw, command, boost::regex(" "));
+        auto keyw = split_and_trim(command, " ");
 
         for (auto it = ActrBase::available.begin();
                   it != ActrBase::available.end(); ++it) {
-            if ((*it)->name == keyw[1]) {
+            if ((*it)->name == keyw[2]) {
                 if (instance != NULL)
                     delete instance;
 
@@ -83,7 +85,9 @@ namespace actr {
                 instance->set_class_usage(class_usage);
                 instance->main_loop();
 
-                delete instance;
+                if (instance != NULL)
+                    delete instance;
+
                 instance = NULL;
             }
         }
@@ -97,6 +101,11 @@ namespace actr {
 
         int my_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+
+        what = "#! create " + what;
+
+        auto split = split_and_trim(what, " ");
+        std::string class_name = split[2];
 
         // The master propagates the information about
         // which module the actors must load
@@ -112,22 +121,26 @@ namespace actr {
                 MPI_Wait(&requests[i], &tmp_status);
             }
 
-            delete[] requests;
-        }
 
-        if (my_rank >= first_free_rank &&
+            delete[] requests;
+        } else if (my_rank >= first_free_rank &&
             my_rank < first_free_rank + how_many) function_watch();
 
         for (int i = first_free_rank;
                  i < first_free_rank + how_many; ++i)
-            class_usage.emplace(i, what);
+            class_usage.emplace(i, class_name);
 
         first_free_rank += how_many;
     }
 
     void ActrBase::allocate_additional(std::string what, int how_many)
     {
+        std::cout << "Allocating additional " << what << std::endl;
         MPI_Comm_size(MPI_COMM_WORLD, &total_ranks);
+        what = "#! create " + what;
+
+        auto split = split_and_trim(what, " ");
+        std::string class_name = split[2];
 
         int set_up = 0;
         std::vector<int> added;
@@ -144,7 +157,7 @@ namespace actr {
             MPI_Wait(&request, &tmp_status);
             added.push_back(i);
 
-            class_usage.emplace(i, what);
+            class_usage.emplace(i, class_name);
             ++set_up;
 
             if (set_up == how_many)
@@ -192,15 +205,15 @@ namespace actr {
         if (msg.first.find("#!") == std::string::npos)
             return msg;
 
-        std::vector<std::string> keyw, comms;
-        boost::split_regex(keyw, msg.first, boost::regex(";"));
-        boost::split_regex(comms, keyw[0], boost::regex(" "));
+        auto keyw = split_and_trim(msg.first, ";");
+        auto comms = split_and_trim(keyw[0], " ");
 
-        int rank = std::stoi(comms[2]);
         if (comms[1] == "del") {
+            int rank = std::stoi(comms[2]);
             if (class_usage.find(rank) != class_usage.end())
                 class_usage.erase(rank);
         } else if (comms[1] == "add") {
+            int rank = std::stoi(comms[2]);
             if (class_usage.find(rank) != class_usage.end())
                 class_usage.erase(rank);
 
@@ -208,7 +221,7 @@ namespace actr {
         } else if (comms[1] == "die") {
             throw ProgramDeathRequest();
         } else if (comms[1] == "create") {
-            clone_instance(msg.first);
+            instance = clone_instance(msg.first);
         }
 
 
@@ -236,9 +249,10 @@ namespace actr {
         int found = 0;
         for (auto it = class_usage.begin(); it != class_usage.end(); ++it) {
             if (it->second == classname) {
-                found += 1;
                 if (found == which)
                     return it->first;
+
+                found += 1;
             }
         }
 

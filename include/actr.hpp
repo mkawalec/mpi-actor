@@ -7,6 +7,7 @@
  */
 
 #include "actr/ActrBase.hpp"
+#include "actr/Controller.hpp"
 #include "actr/exceptions.hpp"
 #include "actr/helpers.hpp"
 
