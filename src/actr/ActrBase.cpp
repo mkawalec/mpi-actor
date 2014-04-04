@@ -88,6 +88,7 @@ namespace actr {
             if (instance != NULL) {
                 instance->set_class_usage(class_usage);
                 instance->main_loop();
+                std::cout << "OUT OF MAIN LOOP!!!!!!!" << std::endl;
 
                 if (instance != NULL)
                     delete instance;

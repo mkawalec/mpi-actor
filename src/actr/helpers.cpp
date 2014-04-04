@@ -42,14 +42,14 @@ namespace actr {
 
         int my_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-            //if (my_rank == 18) std::cout << "I" << std::endl;
+            if (my_rank == 22) std::cout << "I" << std::endl;
 
         while (is_message()) {
             //if (my_rank == 18) std::cout << "II" << std::endl;
             msg_backlog.push_back(get_str());
         }
 
-            //if (my_rank == 18) std::cout << "III" << std::endl;
+            if (my_rank == 22) std::cout << "III" << std::endl;
         MPI_Request request;
         MPI_Issend((char*)message.c_str(), message.size(),
                   MPI_CHAR, to_whom, 0, MPI_COMM_WORLD, &request);
@@ -64,9 +64,20 @@ namespace actr {
         // If there is any message in the backlog,
         // return it instead of looking in the network
         if (!msg_backlog.empty()) {
-            message to_return = msg_backlog.front();
-            msg_backlog.pop_front();
-            return to_return;
+            if (from == MPI_ANY_SOURCE) {
+                message to_return = msg_backlog.front();
+                msg_backlog.pop_front();
+                return to_return;
+            } else {
+                for (auto it = msg_backlog.begin();
+                          it != msg_backlog.end(); ++it) {
+                    if (it->second == from) {
+                        message to_return = msg_backlog.front();
+                        msg_backlog.erase(it);
+                        return to_return;
+                    }
+                }
+            }
         }
 
         MPI_Status status;

@@ -43,7 +43,7 @@ namespace frogs {
 
         // The main loop of a frog actor
         while (true) {
-            std::cout << "Entering main loop in " << my_rank << std::endl;
+            //std::cout << "Entering main loop in " << my_rank << std::endl;
             // If there is an outstanding message, consume it
             actr::message msg("", -1);
             while (actr::is_message() and msg.second == -1) {
@@ -78,7 +78,7 @@ namespace frogs {
             //std::cout << "after wait at rank " << my_rank << std::endl;
 
             while (msg.second == -1) {
-                msg = preprocess_msg(actr::get_str());
+                msg = preprocess_msg(actr::get_str(land_num));
             }
 
             //if (my_rank == 18) std::cout << "4" << std::endl;
