@@ -3,6 +3,12 @@
 
 namespace frogs {
 
+    Clock::Clock()
+    {
+        name        = "clock";
+        description = "A chronometer announcing year changes";
+    }
+
     actr::ActrBase* Clock::clone()
     {
         return new Clock(*this);

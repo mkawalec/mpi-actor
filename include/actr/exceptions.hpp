@@ -31,6 +31,7 @@ namespace actr {
     struct AllocationError : public Exception {
         using Exception::Exception;
     };
+
 }
 
 #endif

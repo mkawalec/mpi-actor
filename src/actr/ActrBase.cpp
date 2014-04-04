@@ -62,12 +62,19 @@ namespace actr {
         }
     }
 
+    void ActrBase::set_class_usage(std::map<int, std::string> &usage)
+    {
+        class_usage = usage;
+    }
+
     void ActrBase::execute()
     {
         // If the current instance is not allocated, it should
         // just terminate gracefully
         if (instance != NULL) {
+            instance->set_class_usage(class_usage);
             instance->main_loop();
+
             delete instance;
             instance = NULL;
         }
@@ -140,7 +147,7 @@ namespace actr {
 
     }
 
-    /* Possible commands
+    /* Possible system commands
      * #! del rank -> delete the instance at a given rank
      * #! add rank class_id -> add an instance at a  given rank
      *
@@ -169,10 +176,10 @@ namespace actr {
         }
     }
 
-    std::string ActrBase::preprocess_msg(std::pair<std::string, int> msg)
+    message ActrBase::preprocess_msg(message msg)
     {
         if (msg.first.find("#!") == std::string::npos)
-            return msg.first;
+            return msg;
 
         std::vector<std::string> keyw, comms;
         boost::split_regex(keyw, msg.first, boost::regex(";"));
@@ -192,7 +199,7 @@ namespace actr {
         if (keyw.size() > 1 && keyw[1] == "cont")
             return preprocess_msg(get_str(msg.second));
 
-        return "";
+        return std::make_pair("", -1);
     }
 
     std::map<std::string, int> ActrBase::get_class_counts()

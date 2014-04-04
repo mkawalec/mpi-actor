@@ -10,9 +10,10 @@
 
 namespace actr {
     const int BUF_SIZE = 100;
+    typedef std::pair<std::string, int> message;
 
     MPI_Request send_str(std::string message, int to_whom);
-    std::pair<std::string, int> get_str(int from=MPI_ANY_SOURCE);
+    message get_str(int from=MPI_ANY_SOURCE);
 
 }
 

@@ -8,7 +8,8 @@ namespace frogs {
 
     class LandCell : public actr::ActrBase {
     private:
-        int stuff;
+        int population_influx, infection_level;
+        void reset_year();
 
     protected:
         actr::ActrBase* clone();

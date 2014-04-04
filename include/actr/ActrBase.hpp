@@ -1,6 +1,8 @@
 #ifndef actr_ActrBase_hpp
 #define actr_ActrBase_hpp
 
+#include "actr/helpers.hpp"
+
 #include <cstdlib>
 #include <list>
 #include <string>
@@ -33,7 +35,7 @@ namespace actr {
         std::string name, description;
         virtual ActrBase* clone() = 0;
         std::map<std::string, int> get_class_counts();
-        std::string preprocess_msg(std::pair<std::string, int> msg);
+        message preprocess_msg(message msg);
 
         void update_info(int rank);
 
@@ -48,6 +50,7 @@ namespace actr {
         void execute();
 
         void request_allocation(std::string what, int how_many);
+        void set_class_usage(std::map<int, std::string> &usage);
 
         // Called by just one thread to allocate additional instances
         // of a given class

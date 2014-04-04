@@ -5,7 +5,7 @@ namespace frogs {
 
     Frog::Frog()
     {
-        name = "frog";
+        name        = "frog";
         description = "An actor representing a frog";
     }
 

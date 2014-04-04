@@ -13,6 +13,8 @@ namespace frogs {
         actr::ActrBase* clone();
 
     public:
+        Clock();
+
         void main_loop();
     };
 }
