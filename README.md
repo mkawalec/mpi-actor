@@ -1,4 +1,4 @@
-mpi-actor
+mpi-actr
 =========
 
 Actor model in written in C++11 and with the help of MPI
@@ -8,6 +8,12 @@ In order to compile please make sure you have the latest version of GCC or a fai
     cd build
     cmake ..
     make -j3
+
+The successfully executed build operation creates three files:
+
+* *libactr.so* containing compiled ACTR library. The header files are available at include/actr/. Note that it is only needed to include include/actr.hpp in order to include the whole framework
+* *libbiol.so* containing the functions supplied by the biologists. Headers are available at include/biol/
+* *frogs*, which is an executable example application written with the ACTR framework.
 
 
 ## Important notes
