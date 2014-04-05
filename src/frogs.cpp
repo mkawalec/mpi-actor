@@ -15,9 +15,7 @@ int main(int argc, char *argv[])
         controller.request_allocation("clock", 1);
         controller.request_allocation("land_cell", 16);
         controller.request_allocation("frog ill", 4);
-        MPI_Barrier(MPI_COMM_WORLD);
-        if (my_rank == 0) std::cout << "Ill allocation done" << std::endl;
-        controller.request_allocation("frog healthy", 20);
+        controller.request_allocation("frog healthy", 30);
     } catch (const actr::AllocationError& e) {
         if (my_rank == 0)
             std::cerr << e.what() << std::endl;
@@ -26,7 +24,13 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    controller.execute();
+    try {
+        MPI_Barrier(MPI_COMM_WORLD);
+        controller.execute();
+    } catch (const actr::ProgramDeathRequest& e) {
+        if (my_rank == 0)
+            std::cerr << "End of simulation reached, terminating" << std::endl;
+    }
 
     MPI_Finalize();
     return 0;

@@ -45,31 +45,21 @@ namespace actr {
     }
 
 
-    /** Sends a string asynchronously and returns the
-     *  request handle, on which MPI_Wait must be called to
-     *  resolve the request.
-     */
     MPI_Request send_str(std::string message, int to_whom)
     {
-        // If there is an outstanding message from this id,
-        // retrieve it first
-
+        // If there is an outstanding message to the
+        // current thread, retrieve it first
         int my_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-            //if (my_rank == 22) std::cout << "I" << std::endl;
 
         while (is_message()) {
-            //if (my_rank == 18) std::cout << "II" << std::endl;
             msg_backlog.push_back(get_str(MPI_ANY_SOURCE, true));
-            //std::cout << "Filling backlog" << std::endl;
         }
 
         MPI_Request request;
         MPI_Issend((char*)message.c_str(), message.size(),
                   MPI_CHAR, to_whom, 0, MPI_COMM_WORLD, &request);
-        //std::cout << "send to " << to_whom << std::endl;
 
-            //if (my_rank == 18) std::cout << "IV" << std::endl;
         return request;
     }
 
@@ -81,7 +71,6 @@ namespace actr {
         if (!msg_backlog.empty() and !force_network
                 and backlog_has_message(from)) {
 
-            //std::cout << "Trying backlog" << std::endl;
             if (from == MPI_ANY_SOURCE) {
                 message to_return = msg_backlog.front();
                 msg_backlog.pop_front();
@@ -97,7 +86,6 @@ namespace actr {
                 }
             }
         }
-        //std::cout << "from net " << from << std::endl;
 
         MPI_Status status;
         int msg_size;
@@ -105,8 +93,9 @@ namespace actr {
         MPI_Recv(inbuf, sizeof(char) * BUF_SIZE, MPI_CHAR, from,
                  0, MPI_COMM_WORLD, &status);
 
+        // Return a message of an appropriate size, don't
+        // include the padding in the message
         MPI_Get_count(&status, MPI_CHAR, &msg_size);
-        //std::cout << "returning from " << from << std::endl;
         return std::make_pair(std::string(inbuf, msg_size), status.MPI_SOURCE);
     }
 
@@ -116,6 +105,7 @@ namespace actr {
         std::vector<std::string> comms;
         boost::split_regex(comms, command, boost::regex(delimiter));
 
+        // Trim each of the parameters of any spaces, if exist
         for (int i = 0; (unsigned)i < comms.size(); ++i)
             boost::trim(comms[i]);
 

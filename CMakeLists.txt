@@ -4,7 +4,7 @@ include_directories(src include)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
     message(status "Setting GCC flags!")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wextra -Wno-ignored-qualifiers -pedantic -W -std=c++0x -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -O3 -ftree-vectorize -ffast-math -Wall -Wextra -Wno-ignored-qualifiers -pedantic -W -std=c++0x -g")
 else()
     message(status "gcc not found!")
     return()

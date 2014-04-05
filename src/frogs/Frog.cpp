@@ -41,8 +41,6 @@ namespace frogs {
 
         History<int> infection_hist(500), influx_hist(300);
         actr::message msg("", -1);
-        if (!healthy)
-            std::cout << "We have a sicko over here!" << std::cout;
 
         // The main loop of a frog actor
         while (true) {

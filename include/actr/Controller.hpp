@@ -6,6 +6,10 @@
 
 namespace actr {
 
+    /*! This should be created in a target
+     *  program in order to book instances and
+     *  execute everything
+     */
     class Controller : public ActrBase {
     protected:
         ActrBase* clone() { return new Controller(*this);}

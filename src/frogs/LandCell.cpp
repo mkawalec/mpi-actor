@@ -6,6 +6,8 @@
 #include <string>
 #include <utility>
 #include <mpi.h>
+#include <stdexcept>
+#include <fstream>
 
 
 namespace frogs {
@@ -14,6 +16,15 @@ namespace frogs {
     {
         name        = "land_cell";
         description = "A cell being a cell of land";
+    }
+
+    LandCell::~LandCell()
+    {
+        if (output != NULL) {
+            output->close();
+            delete output;
+            output = NULL;
+        }
     }
 
     actr::ActrBase* LandCell::clone()
@@ -26,12 +37,11 @@ namespace frogs {
         int my_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
-        while (true) {
-            //if (my_rank == 11) std::cout << "About to get a msg at " << my_rank << std::endl;
+        output = new std::ofstream("land-" + std::to_string(my_rank));
 
+        while (true) {
             actr::message msg = preprocess_msg(actr::get_str());
             if (msg.second == -1) continue;
-            //if (my_rank == 11) std::cout << "Received at " << my_rank << std::endl;
 
             MPI_Request request;
             MPI_Status status;
@@ -41,19 +51,25 @@ namespace frogs {
                 population_influx += 1;
                 request = actr::send_str(std::to_string(population_influx) + " "
                         + std::to_string(infection_level), msg.second);
-                //if (my_rank == 11) std::cout << "Before first wait" << std::endl;
                 MPI_Wait(&request, &status);
-                //if (my_rank == 11) std::cout << "After first wait" << std::endl;
 
             } else if (msg.first == "clean") {
                 population_influx += 1;
                 request = actr::send_str(std::to_string(population_influx) + " "
                         + std::to_string(infection_level), msg.second);
-                //std::cout << "Before second wait to " << msg.second << " by " << my_rank << std::endl;
                 MPI_Wait(&request, &status);
-                //std::cout << "After second wait" << std::endl;
             } else if (msg.first == "new_year") {
-                if (my_rank == 10) std::cout << "Number of frogs: " << get_class_counts().at("frog") << std::endl;
+                *output << population_influx << " " << infection_level << std::endl;
+
+                if (my_rank == 10) {
+                    try {
+                        std::cout << "Number of frogs: " <<
+                            get_class_counts().at("frog") << std::endl;
+                    } catch (const std::out_of_range& e) {
+                        std::cout << "No frogs left!" << std::endl;
+                    }
+                }
+
                 reset_year();
             } else if (msg.first == "terminate") {
                 throw actr::ProgramDeathRequest();

@@ -3,6 +3,8 @@
 
 #include "actr.hpp"
 
+#include <fstream>
+
 
 namespace frogs {
 
@@ -10,12 +12,14 @@ namespace frogs {
     private:
         int population_influx, infection_level;
         void reset_year();
+        std::ofstream *output = NULL;
 
     protected:
         actr::ActrBase* clone();
 
     public:
         LandCell();
+        ~LandCell();
 
         void main_loop();
     };

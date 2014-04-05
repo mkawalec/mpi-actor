@@ -5,6 +5,10 @@
 
 namespace actr {
 
+    /*! A standard exception class, more
+     *  lightweight and easier to use in our
+     *  case than std::exception
+     */
     struct Exception {
     protected:
         std::string message;
@@ -32,6 +36,8 @@ namespace actr {
         using Exception::Exception;
     };
 
+    // If the requested instance was not found,
+    // the following is raised
     struct InstanceNotFound : public Exception {
         using Exception::Exception;
     };
