@@ -11,6 +11,9 @@ namespace frogs {
     {
         name          = "clock";
         description   = "A chronometer announcing year changes";
+
+        // The clock is not capable of processing incoming
+        // messages
         has_eventloop = false;
     }
 
@@ -22,14 +25,14 @@ namespace frogs {
     void Clock::main_loop()
     {
         while (true) {
-            // A clock class periodically sends an end-of-year
-            // message to all cells it knows of
+            // The clock thread only gets
+            // activated on periodic intervals
             std::this_thread::sleep_for(std::chrono::milliseconds(year_interval));
 
             int land_count = get_class_counts().at("land_cell");
             auto requests = new MPI_Request[land_count];
 
-
+            // Send the new year signals to all land cells
             int j = 0;
             for (auto it = class_usage.begin();
                       it != class_usage.end(); ++it) {
@@ -72,6 +75,6 @@ namespace frogs {
         }
     }
 
-    DECLARE_ACTR_PLUGIN(Clock);
 
+    DECLARE_ACTR_PLUGIN(Clock);
 }

@@ -5,12 +5,17 @@
 
 int main(int argc, char *argv[])
 {
+    // MPI_Init must be called before any action
+    // involing ACTR is performed
     MPI_Init(&argc, &argv);
 
-    actr::Controller controller;
     int my_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
+    actr::Controller controller;
+
+    // Allocate the frogs, quit if not
+    // enough threads are available
     try {
         controller.request_allocation("clock", 1);
         controller.request_allocation("land_cell", 16);

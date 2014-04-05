@@ -3,6 +3,9 @@
 
 namespace frogs {
 
+    // History is a simple circular buffer
+    // with the ability to compute the average of
+    // n of its elements
     template <typename T>
     class History {
     private:

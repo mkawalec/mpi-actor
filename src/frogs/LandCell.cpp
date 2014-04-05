@@ -20,6 +20,8 @@ namespace frogs {
 
     LandCell::~LandCell()
     {
+        // At destruction, properly close the
+        // output file
         if (output != NULL) {
             output->close();
             delete output;
@@ -37,6 +39,7 @@ namespace frogs {
         int my_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
+        // Open the output file
         output = new std::ofstream("land-" + std::to_string(my_rank));
 
         while (true) {
@@ -46,6 +49,8 @@ namespace frogs {
             MPI_Request request;
             MPI_Status status;
 
+            // Reply differently depending on the
+            // contents of a message
             if (msg.first == "infected") {
                 infection_level += 1;
                 population_influx += 1;

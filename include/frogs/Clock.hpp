@@ -5,6 +5,9 @@
 
 namespace frogs {
 
+    /*! This is a clock class, enforcing years
+     *  and simulation finish time
+     */
     class Clock : public actr::ActrBase {
     private:
         int year_interval = 200;

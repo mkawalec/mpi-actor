@@ -8,6 +8,9 @@
 
 namespace frogs {
 
+    /*! The main initiator of actions,
+     *  a frog, jumps around.
+     */
     class Frog : public actr::ActrBase {
     private:
         int hop_count = 0;
@@ -17,6 +20,8 @@ namespace frogs {
 
     protected:
         actr::ActrBase* clone();
+
+        // A frog needs a custom parameter processor
         void setup_params(std::vector<std::string> commands);
 
     public:
