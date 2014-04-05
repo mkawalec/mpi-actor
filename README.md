@@ -3,7 +3,7 @@ mpi-actr
 
 Actor model in written in C++11 and with the help of MPI
 
-In order to compile please make sure you have the latest version of GCC or a fairly new version of Clang available. The solution uses CMake to generate makefiles. In order to build it, please do the following:
+In order to compile please make sure you have at least GCC 4.8.2 or a fairly new version of Clang available. The solution uses CMake to generate makefiles. In order to build it, please do the following:
 
     cd build
     cmake ..
