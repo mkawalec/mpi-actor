@@ -71,7 +71,7 @@ namespace actr {
         }
 
         // Make sure that the requests complete
-        for (int i = 0; i < requests.size(); ++i)
+        for (int i = 0; (unsigned)i < requests.size(); ++i)
             MPI_Wait(&requests[i], &tmp_status);
     }
 
